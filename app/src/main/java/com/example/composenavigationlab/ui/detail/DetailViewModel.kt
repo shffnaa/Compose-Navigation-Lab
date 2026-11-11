@@ -15,29 +15,39 @@ class DetailViewModel(
         private set
 
     fun loadStudent(id: Int) {
-        val student = repository.getStudentById(id)
+        uiState = DetailUiState(
+            isLoading = true
+        )
 
-        uiState = if (student != null) {
-            DetailUiState(student = student)
-        } else {
-            DetailUiState(
-                errorMessage = "Student dengan ID $id tidak ditemukan."
-            )
+        repository.getStudent(id) { result ->
+            result.onSuccess { student ->
+                uiState = DetailUiState(
+                    student = student
+                )
+            }.onFailure { error ->
+                uiState = DetailUiState(
+                    errorMessage = error.message
+                        ?: "Gagal mengambil detail pengguna"
+                )
+            }
         }
     }
 
     companion object {
         fun factory(
             repository: StudentRepository
-        ): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-
+        ): ViewModelProvider.Factory {
+            return object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(
                     modelClass: Class<T>
                 ): T {
-                    return DetailViewModel(repository) as T
+                    if (modelClass.isAssignableFrom(DetailViewModel::class.java)) {
+                        return DetailViewModel(repository) as T
+                    }
+                    throw IllegalArgumentException("Unknown ViewModel class")
                 }
             }
+        }
     }
 }

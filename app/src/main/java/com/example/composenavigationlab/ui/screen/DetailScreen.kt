@@ -13,7 +13,10 @@ import androidx.compose.ui.unit.dp
 import com.example.composenavigationlab.ui.detail.DetailUiState
 
 @Composable
-fun DetailScreen(uiState: DetailUiState, onBack: () -> Unit) {
+fun DetailScreen(
+    uiState: DetailUiState,
+    onBack: () -> Unit
+) {
     val student = uiState.student
 
     Column(
@@ -32,97 +35,108 @@ fun DetailScreen(uiState: DetailUiState, onBack: () -> Unit) {
             style = MaterialTheme.typography.headlineMedium
         )
 
-        if (student != null) {
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Surface(
+        when {
+            uiState.isLoading -> {
+                Column(
                     modifier = Modifier
-                        .size(88.dp)
-                        .clip(CircleShape),
-                    color = MaterialTheme.colorScheme.secondaryContainer
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            student.name
-                                .split(" ")
-                                .take(2)
-                                .joinToString("") { it.first().uppercase() },
-                            style = MaterialTheme.typography.headlineMedium
-                        )
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Memuat data mahasiswa...")
+                }
+            }
+
+            student != null -> {
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .size(88.dp)
+                            .clip(CircleShape),
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                student.name
+                                    .split(" ")
+                                    .take(2)
+                                    .joinToString("") { it.first().uppercase() },
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        student.name,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    Text(
+                        "Mahasiswa Aktif",
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+
+                    Text(
+                        "Student ID: ${student.id}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Text(
+                    "Personal Information",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Card {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        DetailItem("Student ID", student.id.toString())
+                        DetailItem("Full Name", student.name)
+                        DetailItem("Email", student.email)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Text(
-                    student.name,
-                    style = MaterialTheme.typography.titleLarge
+                    "University Information",
+                    style = MaterialTheme.typography.titleMedium
                 )
 
-                Text(
-                    "Mahasiswa Aktif",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-
-                Text(
-                    "Student ID: ${student.id}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            Text(
-                "Personal Information",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Card {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    DetailItem("Student ID", student.id.toString())
-                    DetailItem("Full Name", student.name)
-                    DetailItem("Study Program", student.program)
-                    DetailItem("Academic Year", student.year.toString())
+                Card {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        DetailItem("University", student.university)
+                    }
                 }
             }
 
-            Text(
-                "University Information",
-                style = MaterialTheme.typography.titleMedium
-            )
+            else -> {
+                Card {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "Student tidak ditemukan",
+                            style = MaterialTheme.typography.titleMedium
+                        )
 
-            Card {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        "Universitas Brawijaya",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text("Fakultas Ilmu Komputer")
-                    Text("Malang, Jawa Timur")
-                }
-            }
-
-        } else {
-            Card {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        "Student tidak ditemukan",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        uiState.errorMessage
-                            ?: "Data mahasiswa tidak tersedia."
-                    )
+                        Text(
+                            uiState.errorMessage
+                                ?: "Data mahasiswa tidak tersedia."
+                        )
+                    }
                 }
             }
         }
@@ -144,6 +158,7 @@ fun DetailItem(label: String, value: String) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary
         )
+
         Text(
             value,
             style = MaterialTheme.typography.bodyLarge

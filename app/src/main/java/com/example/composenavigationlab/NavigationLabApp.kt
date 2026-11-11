@@ -1,3 +1,4 @@
+
 package com.example.composenavigationlab
 
 import androidx.compose.runtime.Composable
@@ -10,8 +11,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
+import com.example.composenavigationlab.data.remote.RetrofitClient
+import com.example.composenavigationlab.data.remote.StudentRemoteDataSource
 import com.example.composenavigationlab.data.repository.DefaultStudentRepository
-import com.example.composenavigationlab.data.source.StudentLocalDataSource
 import com.example.composenavigationlab.screens.AboutScreen
 import com.example.composenavigationlab.screens.ProfileScreen
 import com.example.composenavigationlab.ui.detail.DetailViewModel
@@ -22,12 +24,12 @@ import com.example.composenavigationlab.ui.screen.HomeScreen
 @Composable
 fun NavigationLabApp() {
 
-    val dataSource = remember {
-        StudentLocalDataSource()
+    val remoteDataSource = remember {
+        StudentRemoteDataSource(RetrofitClient.apiService)
     }
 
     val repository = remember {
-        DefaultStudentRepository(dataSource)
+        DefaultStudentRepository(remoteDataSource)
     }
 
     val navController = rememberNavController()
@@ -37,29 +39,35 @@ fun NavigationLabApp() {
         startDestination = Routes.HOME
     ) {
 
-        composable(Routes.HOME) {
 
+        composable(Routes.HOME) {
             val homeViewModel: HomeViewModel = viewModel(
                 factory = HomeViewModel.factory(repository)
             )
 
-            LaunchedEffect(Unit) {
-                homeViewModel.loadStudents()
-            }
-
             HomeScreen(
                 uiState = homeViewModel.uiState,
                 onStudentClick = { id ->
-                    navController.navigate(Routes.detail((id)))
+                    navController.navigate(Routes.detail(id))
                 },
                 onOpenProfile = {
                     navController.navigate(Routes.PROFILE)
                 },
                 onOpenAbout = {
                     navController.navigate(Routes.ABOUT)
+                },
+                onRetry = {
+                    homeViewModel.retry()
+                },
+                onSearchQueryChange = { query ->
+                    homeViewModel.updateSearchQuery(query)
+                },
+                onSearch = {
+                    homeViewModel.searchStudents()
                 }
             )
         }
+
 
         composable(
             route = Routes.DETAIL,

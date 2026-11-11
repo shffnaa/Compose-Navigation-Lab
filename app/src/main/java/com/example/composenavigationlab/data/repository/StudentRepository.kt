@@ -1,24 +1,20 @@
 package com.example.composenavigationlab.data.repository
 
 import com.example.composenavigationlab.data.model.Student
-import com.example.composenavigationlab.data.source.StudentLocalDataSource
 
 interface StudentRepository {
 
-    fun getStudentById(id: Int): Student?
+    fun getStudents(
+        callback: (Result<List<Student>>) -> Unit
+    )
 
-    fun getStudents(): List<Student>
-}
+    fun getStudent(
+        id: Int,
+        callback: (Result<Student>) -> Unit
+    )
 
-class DefaultStudentRepository(
-    private val dataSource: StudentLocalDataSource
-) : StudentRepository {
-
-    override fun getStudentById(id: Int): Student? {
-        return dataSource.getStudentById(id)
-    }
-
-    override fun getStudents(): List<Student> {
-        return dataSource.getStudents()
-    }
+    fun searchStudents(
+        query: String,
+        callback: (Result<List<Student>>) -> Unit
+    )
 }
