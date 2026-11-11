@@ -4,17 +4,9 @@ import com.example.composenavigationlab.data.model.Student
 
 interface StudentRepository {
 
-    fun getStudents(
-        callback: (Result<List<Student>>) -> Unit
-    )
+    suspend fun getStudents(): List<Student>
 
-    fun getStudent(
-        id: Int,
-        callback: (Result<Student>) -> Unit
-    )
+    suspend fun getStudent(id: Int): Student
 
-    fun searchStudents(
-        query: String,
-        callback: (Result<List<Student>>) -> Unit
-    )
+    suspend fun searchStudents(query: String): List<Student>
 }

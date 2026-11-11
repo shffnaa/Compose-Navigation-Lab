@@ -26,12 +26,13 @@ import com.example.composenavigationlab.ui.home.HomeUiState
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    searchQuery: String,
     onStudentClick: (Int) -> Unit,
     onOpenProfile: () -> Unit,
     onOpenAbout: () -> Unit,
     onRetry: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
-    onSearch: () -> Unit
+    onRefresh: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -39,13 +40,14 @@ fun HomeScreen(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
         Text(
             "Daftar Mahasiswa",
             style = MaterialTheme.typography.headlineMedium
         )
 
         OutlinedTextField(
-            value = uiState.searchQuery,
+            value = searchQuery,
             onValueChange = onSearchQueryChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Cari nama pengguna") },
@@ -54,11 +56,11 @@ fun HomeScreen(
         )
 
         Button(
-            onClick = onSearch,
+            onClick = onRefresh,
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isLoading
         ) {
-            Text("Cari")
+            Text("Refresh")
         }
 
         when {
