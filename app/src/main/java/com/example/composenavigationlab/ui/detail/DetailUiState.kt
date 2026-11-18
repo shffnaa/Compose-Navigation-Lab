@@ -5,6 +5,7 @@ import com.example.composenavigationlab.data.model.Student
 data class DetailUiState(
     val student: Student? = null,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isFavorite: Boolean = false
 )
 

@@ -2,6 +2,7 @@ package com.example.composenavigationlab.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.composenavigationlab.data.preferences.UserPreferencesRepository
 import com.example.composenavigationlab.data.repository.StudentRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
@@ -11,10 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val repository: StudentRepository
+    private val repository: StudentRepository,
+    private val preferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -24,11 +27,33 @@ class HomeViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     init {
-        observeSearch()
+        viewModelScope.launch {
+            // Memulihkan query terakhir dari DataStore
+            _searchQuery.value =
+                preferencesRepository.lastSearchQuery.first()
+
+            // Menjalankan pencarian
+            observeSearch()
+
+            // Menyimpan perubahan query ke DataStore
+            observeQueryPersistence()
+        }
     }
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeQueryPersistence() {
+        viewModelScope.launch {
+            searchQuery
+                .debounce(500)
+                .distinctUntilChanged()
+                .collectLatest { value ->
+                    preferencesRepository.saveLastSearchQuery(value)
+                }
+        }
     }
 
     @OptIn(FlowPreview::class)
@@ -60,7 +85,8 @@ class HomeViewModel(
 
                     } catch (e: Exception) {
                         _uiState.value = HomeUiState(
-                            errorMessage = e.message ?: "Gagal mengambil data"
+                            errorMessage = e.message
+                                ?: "Gagal mengambil data"
                         )
                     }
                 }
@@ -93,7 +119,8 @@ class HomeViewModel(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = e.message ?: "Gagal memperbarui data"
+                    errorMessage = e.message
+                        ?: "Gagal memperbarui data"
                 )
             }
         }

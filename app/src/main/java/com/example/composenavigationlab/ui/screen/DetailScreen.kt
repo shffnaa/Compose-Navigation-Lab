@@ -1,167 +1,102 @@
 package com.example.composenavigationlab.ui.screen
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.composenavigationlab.ui.detail.DetailUiState
 
 @Composable
 fun DetailScreen(
     uiState: DetailUiState,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onToggleFavorite: () -> Unit
 ) {
-    val student = uiState.student
-
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        modifier = Modifier.fillMaxSize().background(Color(0xFFF0FAF4)).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        TextButton(onClick = onBack) {
-            Text("← Kembali")
-        }
-
-        Text(
-            "Student Profile",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Text(text = "Detail Student", color = Color(0xFF5B9072))
+        Spacer(modifier = Modifier.height(16.dp))
 
         when {
-            uiState.isLoading -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 48.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("Memuat data mahasiswa...")
-                }
-            }
+            uiState.isLoading -> CircularProgressIndicator()
 
-            student != null -> {
-
-                Column(
+            uiState.errorMessage != null -> {
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    Surface(
-                        modifier = Modifier
-                            .size(88.dp)
-                            .clip(CircleShape),
-                        color = MaterialTheme.colorScheme.secondaryContainer
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                student.name
-                                    .split(" ")
-                                    .take(2)
-                                    .joinToString("") { it.first().uppercase() },
-                                style = MaterialTheme.typography.headlineMedium
-                            )
+                        Text("Data mahasiswa tidak dapat ditampilkan")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(uiState.errorMessage)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onBack,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF82B99A))
+                        ) {
+                            Text("Kembali ke Home", color = Color.White)
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        student.name,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-
-                    Text(
-                        "Mahasiswa Aktif",
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-
-                    Text(
-                        "Student ID: ${student.id}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Text(
-                    "Personal Information",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Card {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        DetailItem("Student ID", student.id.toString())
-                        DetailItem("Full Name", student.name)
-                        DetailItem("Email", student.email)
-                    }
-                }
-
-                Text(
-                    "University Information",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Card {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        DetailItem("University", student.university)
-                    }
                 }
             }
 
-            else -> {
-                Card {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            "Student tidak ditemukan",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+            uiState.student != null -> {
+                val student = uiState.student
 
-                        Text(
-                            uiState.errorMessage
-                                ?: "Data mahasiswa tidak tersedia."
-                        )
-                    }
+                Text("ID: ${student.id}")
+                Text("Nama: ${student.name}")
+                Text("Email: ${student.email}")
+                Text("University: ${student.university}")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onToggleFavorite,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF82B99A)
+                    )
+                ) {
+                    Text(
+                        if (uiState.isFavorite)
+                            "Hapus dari Favorit"
+                        else
+                            "Simpan ke Favorit",
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = onBack,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF82B99A)
+                    )
+                ) {
+                    Text("Kembali", color = Color.White)
                 }
             }
         }
-
-        Button(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Kembali ke Home")
-        }
-    }
-}
-
-@Composable
-fun DetailItem(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        Text(
-            value,
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }

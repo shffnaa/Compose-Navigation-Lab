@@ -32,7 +32,8 @@ fun HomeScreen(
     onOpenAbout: () -> Unit,
     onRetry: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onOpenFavorites: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -138,6 +139,13 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+
+        OutlinedButton(
+            onClick = onOpenFavorites,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Favorite Students")
         }
 
         OutlinedButton(
